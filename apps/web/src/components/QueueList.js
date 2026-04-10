@@ -1,0 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+export function QueueList({ queue, currentTrackId }) {
+    return (_jsx("div", { className: "space-y-3", children: queue.map((track, index) => (_jsx("div", { className: `rounded-[20px] border px-4 py-3 ${track.id === currentTrackId ? "border-accent/40 bg-accent/10" : "border-white/10 bg-white/5"}`, children: _jsxs("div", { className: "flex items-center justify-between gap-3", children: [_jsxs("div", { children: [_jsx("div", { className: "text-sm uppercase tracking-[0.2em] text-[#f6c28b]", children: String(index + 1).padStart(2, "0") }), _jsx("div", { className: "mt-1 text-lg font-medium text-ember", children: track.title }), _jsx("div", { className: "text-sm text-[#f6c28b]", children: track.artist })] }), _jsxs("div", { className: "text-sm text-[#f6c28b]", children: [Math.floor(track.durationMs / 1000), "s"] })] }) }, track.id))) }));
+}

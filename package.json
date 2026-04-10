@@ -1,0 +1,17 @@
+{
+  "name": "streamlink",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:server": "npm run dev --workspace @streamlink/server",
+    "dev:web": "npm run dev --workspace @streamlink/web",
+    "dev:mobile": "npm run start --workspace @streamlink/mobile",
+    "dev:companion": "npm run dev --workspace @streamlink/companion",
+    "build": "npm run build --workspaces",
+    "typecheck": "npm run typecheck --workspaces"
+  }
+}

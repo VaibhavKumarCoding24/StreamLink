@@ -1,0 +1,66 @@
+{
+  "devices": [
+    {
+      "id": "79a5ff8d-7b54-4162-830b-64e898ab149f",
+      "name": "Laptop Host",
+      "type": "web",
+      "fingerprint": "host-smoke-test",
+      "trustedAt": 1775845901487,
+      "lastSeenAt": 1775846243139,
+      "isHost": true,
+      "accessToken": "c66412feffa313eaa2d7da4cb05adfe68894240738477fab"
+    },
+    {
+      "id": "1ac72e32-8b15-4c0e-84bd-317e9fbac1c1",
+      "name": "Android Smoke",
+      "type": "android",
+      "fingerprint": "android-smoke-test",
+      "trustedAt": 1775845995743,
+      "lastSeenAt": 1775846243158,
+      "accessToken": "cb97862c13126379ecc4ba60bb33d82069700610be3a1cb2"
+    },
+    {
+      "id": "a10a2e1c-0525-4190-93ac-9e46130e5e42",
+      "name": "Realtime Host",
+      "type": "web",
+      "fingerprint": "host-realtime-test",
+      "trustedAt": 1775846311604,
+      "lastSeenAt": 1775846311640,
+      "isHost": true,
+      "accessToken": "a1ecdbafb3f8499c868388810914ab7e17aa7b5b8bbed8ea"
+    },
+    {
+      "id": "c4ae3b1f-56f5-4ee9-a5f8-f11f0ab41bcc",
+      "name": "Realtime Android",
+      "type": "android",
+      "fingerprint": "android-realtime-test",
+      "trustedAt": 1775846311619,
+      "lastSeenAt": 1775846311644,
+      "accessToken": "ae9acc0c5f5c38f3a9736126e36b94aa5cb7762330e50d07"
+    },
+    {
+      "id": "ea32a07b-a472-46a1-b0b7-f6665e8e4710",
+      "name": "Laptop Host",
+      "type": "web",
+      "fingerprint": "host-566d1a5c-c62b-44f4-857f-cf307826acf6",
+      "trustedAt": 1775847883483,
+      "lastSeenAt": 1775847883880,
+      "isHost": true,
+      "accessToken": "088aeedbb6e8e853bcf24099ab4ab33b2b8ec977924c1254"
+    }
+  ],
+  "pairings": [
+    {
+      "pin": "291994",
+      "deviceName": "Laptop Host",
+      "createdAt": 1775847916277,
+      "expiresAt": 1775848216277
+    },
+    {
+      "pin": "687199",
+      "deviceName": "Laptop Host",
+      "createdAt": 1775848018973,
+      "expiresAt": 1775848318973
+    }
+  ]
+}

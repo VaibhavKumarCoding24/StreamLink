@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "StreamLink",
+    "slug": "streamlink",
+    "scheme": "streamlink",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "assetBundlePatterns": ["**/*"],
+    "android": {
+      "package": "com.streamlink.mobile"
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "transfers": [
+    {
+      "transferId": "810d8053-b41e-4952-b56b-33f70880985a",
+      "fileName": "Vaibhav - 12300319 - CV.pdf",
+      "fileSize": 226764,
+      "mimeType": "application/pdf",
+      "senderDeviceId": "ea32a07b-a472-46a1-b0b7-f6665e8e4710",
+      "senderName": "Laptop Host",
+      "storedFileName": "1775848205456-Vaibhav_-_12300319_-_CV.pdf",
+      "downloadUrl": "/api/files/810d8053-b41e-4952-b56b-33f70880985a/download",
+      "createdAt": 1775848205468,
+      "status": "completed"
+    },
+    {
+      "transferId": "56b2df1d-5ea6-4910-90e1-79cc1431b9c3",
+      "fileName": "smoke.txt",
+      "fileSize": 17,
+      "mimeType": "text/plain",
+      "senderDeviceId": "1ac72e32-8b15-4c0e-84bd-317e9fbac1c1",
+      "senderName": "Android Smoke",
+      "storedFileName": "1775846243210-smoke.txt",
+      "downloadUrl": "/api/files/56b2df1d-5ea6-4910-90e1-79cc1431b9c3/download",
+      "createdAt": 1775846243213,
+      "status": "completed"
+    }
+  ]
+}
