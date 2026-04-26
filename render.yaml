@@ -14,7 +14,6 @@ services:
   - type: web
     name: streamlink-web
     env: static
-    plan: free
     buildCommand: npm install && npm run build --workspace=@streamlink/web
     staticPublishPath: apps/web/dist
     envVars:
