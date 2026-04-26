@@ -34,7 +34,7 @@ export class DeviceTrustService {
   }
 
   createPairingSession(deviceName: string): PairingSession {
-    const pin = String(randomInt(100000, 999999));
+    const pin = String(randomInt(0, 10000)).padStart(4, "0");
     const session: PairingSession = {
       pin,
       deviceName,

@@ -1,6 +1,15 @@
-import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
+import { ChangeEvent, DragEvent, useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import type { FileTransferRecord, PairingSession, PairedDevice, PlaybackState, Track, TrustedDevice } from "@streamlink/shared";
+import type {
+  CreateUploadSessionPayload,
+  FileTransferRecord,
+  PairingSession,
+  PairedDevice,
+  PlaybackState,
+  Track,
+  TrustedDevice,
+  UploadSessionRecord
+} from "@streamlink/shared";
 import { playerTheme } from "@streamlink/shared";
 import { GlassCard } from "./components/GlassCard";
 import { PlayerControls } from "./components/PlayerControls";
@@ -10,6 +19,16 @@ import { usePlaybackSync } from "./hooks/usePlaybackSync";
 const socketUrl = import.meta.env.VITE_SOCKET_URL ?? "http://localhost:4000";
 const storageKey = "streamlink.host.device";
 const fingerprintKey = "streamlink.host.fingerprint";
+const uploadConcurrency = 6;
+
+type ActiveUpload = {
+  id: string;
+  fileName: string;
+  sentBytes: number;
+  totalBytes: number;
+  progress: number;
+  status: "preparing" | "uploading" | "finalizing" | "completed" | "failed";
+};
 
 const demoQueue: Track[] = [
   {
@@ -76,9 +95,11 @@ export default function App() {
   const [pairingPin, setPairingPin] = useState<PairingSession | null>(null);
   const [lanAddresses, setLanAddresses] = useState<string[]>([]);
   const [transfers, setTransfers] = useState<FileTransferRecord[]>([]);
-  const [uploading, setUploading] = useState(false);
+  const [activeUploads, setActiveUploads] = useState<ActiveUpload[]>([]);
+  const [dragging, setDragging] = useState(false);
   const { state, connected, sendCommand } = usePlaybackSync(socketUrl, demoQueue, hostDevice);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const refreshMetadata = async (deviceId?: string) => {
     const [devicesRes, transfersRes, healthRes] = await Promise.all([
@@ -163,30 +184,117 @@ export default function App() {
     setPairingPin(await response.json());
   };
 
-  const handleUpload = async (event: ChangeEvent<HTMLInputElement>) => {
-    if (!hostDevice || !event.target.files?.[0]) return;
+  const updateUpload = (id: string, patch: Partial<ActiveUpload>) => {
+    setActiveUploads((current) => current.map((upload) => (upload.id === id ? { ...upload, ...patch } : upload)));
+  };
 
-    setUploading(true);
+  const removeUpload = (id: string) => {
+    setActiveUploads((current) => current.filter((upload) => upload.id !== id));
+  };
+
+  const uploadViaParallelChunks = async (file: File) => {
+    if (!hostDevice) return;
+
+    const uploadId = crypto.randomUUID();
+    setActiveUploads((current) => [
+      {
+        id: uploadId,
+        fileName: file.name,
+        sentBytes: 0,
+        totalBytes: file.size,
+        progress: 0,
+        status: "preparing"
+      },
+      ...current
+    ]);
+
     try {
-      const formData = new FormData();
-      formData.append("file", event.target.files[0]);
-      formData.append("senderDeviceId", hostDevice.id);
-      formData.append("senderName", hostDevice.name);
+      const payload: CreateUploadSessionPayload = {
+        fileName: file.name,
+        fileSize: file.size,
+        mimeType: file.type || "application/octet-stream",
+        senderDeviceId: hostDevice.id,
+        senderName: hostDevice.name,
+        chunkSizeBytes: 1024 * 1024
+      };
 
-      const response = await fetch(`${socketUrl}/api/files/upload`, {
+      const sessionResponse = await fetch(`${socketUrl}/api/files/upload-sessions`, {
         method: "POST",
-        body: formData
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
       });
 
-      if (!response.ok) {
-        throw new Error("Upload failed");
+      if (!sessionResponse.ok) {
+        throw new Error("Unable to create upload session");
       }
 
+      const session = (await sessionResponse.json()) as UploadSessionRecord;
+      updateUpload(uploadId, { status: "uploading" });
+
+      const chunkIndexes = Array.from({ length: session.totalChunks }, (_, index) => index);
+      let uploadedBytes = 0;
+
+      const uploadChunk = async () => {
+        while (chunkIndexes.length > 0) {
+          const chunkIndex = chunkIndexes.shift();
+          if (chunkIndex === undefined) return;
+
+          const start = chunkIndex * session.chunkSizeBytes;
+          const end = Math.min(start + session.chunkSizeBytes, file.size);
+          const chunk = file.slice(start, end);
+          const response = await fetch(`${socketUrl}${session.uploadUrl}/${chunkIndex}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/octet-stream",
+              "Content-Length": String(chunk.size)
+            },
+            body: chunk
+          });
+
+          if (!response.ok) {
+            throw new Error(`Chunk ${chunkIndex + 1} failed`);
+          }
+
+          uploadedBytes += chunk.size;
+          const progress = Math.min(100, (uploadedBytes / file.size) * 100);
+          updateUpload(uploadId, {
+            sentBytes: uploadedBytes,
+            progress,
+            status: progress >= 100 ? "finalizing" : "uploading"
+          });
+        }
+      };
+
+      await Promise.all(Array.from({ length: Math.min(uploadConcurrency, session.totalChunks) }, () => uploadChunk()));
+      updateUpload(uploadId, {
+        sentBytes: file.size,
+        progress: 100,
+        status: "completed"
+      });
       await refreshMetadata(hostDevice.id);
-    } finally {
-      setUploading(false);
-      event.target.value = "";
+      window.setTimeout(() => removeUpload(uploadId), 2000);
+    } catch {
+      updateUpload(uploadId, { status: "failed" });
     }
+  };
+
+  const handleFiles = async (files: FileList | File[]) => {
+    for (const file of Array.from(files)) {
+      await uploadViaParallelChunks(file);
+    }
+  };
+
+  const handleUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    if (!event.target.files?.length) return;
+    await handleFiles(event.target.files);
+    event.target.value = "";
+  };
+
+  const handleDrop = async (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setDragging(false);
+    if (!event.dataTransfer.files?.length) return;
+    await handleFiles(event.dataTransfer.files);
   };
 
   return (
@@ -280,19 +388,59 @@ export default function App() {
 
           <GlassCard className="p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-xl font-semibold text-ember">Local File Bridge</h3>
-              <label className="cursor-pointer rounded-full bg-accent/15 px-4 py-2 text-sm text-accent">
-                {uploading ? "Uploading..." : "Send File"}
-                <input hidden type="file" onChange={handleUpload} />
-              </label>
+              <h3 className="text-xl font-semibold text-ember">High-Speed File Bridge</h3>
+              <button
+                className="rounded-full bg-accent/15 px-4 py-2 text-sm text-accent"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                Browse Files
+              </button>
+              <input ref={fileInputRef} hidden multiple type="file" onChange={handleUpload} />
             </div>
+            <div
+              className={`mb-4 rounded-[24px] border border-dashed px-5 py-8 text-center transition ${dragging ? "border-accent bg-accent/10" : "border-white/15 bg-white/5"}`}
+              onDragEnter={(event) => {
+                event.preventDefault();
+                setDragging(true);
+              }}
+              onDragOver={(event) => {
+                event.preventDefault();
+                setDragging(true);
+              }}
+              onDragLeave={(event) => {
+                event.preventDefault();
+                setDragging(false);
+              }}
+              onDrop={handleDrop}
+            >
+              <p className="text-lg text-ember">Drag and drop files here</p>
+              <p className="mt-2 text-sm text-[#f6c28b]">Parallel chunk uploads over your local network for faster transfer throughput.</p>
+            </div>
+            {activeUploads.length ? (
+              <div className="mb-4 space-y-3">
+                {activeUploads.map((upload) => (
+                  <div key={upload.id} className="rounded-[20px] border border-white/10 bg-white/5 px-4 py-3">
+                    <div className="mb-2 flex items-center justify-between gap-3">
+                      <div>
+                        <div className="text-ember">{upload.fileName}</div>
+                        <div className="text-sm text-[#f6c28b]">{Math.round(upload.sentBytes / 1024)} KB / {Math.round(upload.totalBytes / 1024)} KB</div>
+                      </div>
+                      <div className="text-sm text-accent">{upload.status}</div>
+                    </div>
+                    <div className="h-2 overflow-hidden rounded-full bg-white/10">
+                      <div className="h-full rounded-full bg-accent shadow-glow" style={{ width: `${upload.progress}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : null}
             <div className="space-y-3">
               {transfers.map((transfer) => (
                 <div key={transfer.transferId} className="rounded-[20px] border border-white/10 bg-white/5 px-4 py-3">
                   <div className="flex items-center justify-between gap-4">
                     <div>
                       <div className="text-ember">{transfer.fileName}</div>
-                      <div className="text-sm text-[#f6c28b]">{transfer.senderName ?? transfer.senderDeviceId} • {Math.round(transfer.fileSize / 1024)} KB</div>
+                      <div className="text-sm text-[#f6c28b]">{transfer.senderName ?? transfer.senderDeviceId} â€¢ {Math.round(transfer.fileSize / 1024)} KB</div>
                     </div>
                     <a className="rounded-full bg-white/10 px-4 py-2 text-sm text-accent" href={`${socketUrl}${transfer.downloadUrl}`}>
                       Download

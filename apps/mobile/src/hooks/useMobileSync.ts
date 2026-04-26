@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import type {
   ClientToServerEvents,
+  FileTransferOffer,
+  FileTransferProgress,
   PairedDevice,
   PlaybackCommand,
   PlaybackState,
@@ -53,6 +55,8 @@ const initialState: PlaybackState = {
 export function useMobileSync(serverUrl: string, device: PairedDevice | null) {
   const [state, setState] = useState<PlaybackState>(initialState);
   const [connected, setConnected] = useState(false);
+  const [latestTransferOffer, setLatestTransferOffer] = useState<FileTransferOffer | null>(null);
+  const [latestTransferProgress, setLatestTransferProgress] = useState<FileTransferProgress | null>(null);
 
   const socket = useMemo<Socket<ServerToClientEvents, ClientToServerEvents> | null>(() => {
     if (!serverUrl || !device) return null;
@@ -83,6 +87,12 @@ export function useMobileSync(serverUrl: string, device: PairedDevice | null) {
     socket.on("ERROR_STATE", () => {
       setConnected(false);
     });
+    socket.on("FILE_TRANSFER_OFFER", (offer) => {
+      setLatestTransferOffer(offer);
+    });
+    socket.on("FILE_TRANSFER_PROGRESS", (progress) => {
+      setLatestTransferProgress(progress);
+    });
 
     return () => {
       socket.disconnect();
@@ -111,5 +121,5 @@ export function useMobileSync(serverUrl: string, device: PairedDevice | null) {
     [device, socket, state.sessionId]
   );
 
-  return { state, connected, sendCommand };
+  return { state, connected, sendCommand, latestTransferOffer, latestTransferProgress };
 }

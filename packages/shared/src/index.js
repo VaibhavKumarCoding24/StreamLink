@@ -4,3 +4,4 @@ export * from "./events/contracts";
 export * from "./types/playback";
 export * from "./types/fileTransfer";
 export * from "./types/device";
+export * from "./types/discovery";

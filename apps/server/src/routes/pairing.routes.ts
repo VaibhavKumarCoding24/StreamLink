@@ -6,7 +6,7 @@ const pairSchema = z.object({
   deviceName: z.string().min(2),
   deviceType: z.enum(["web", "android"]),
   fingerprint: z.string().min(4),
-  pin: z.string().length(6)
+  pin: z.string().length(4)
 });
 
 const hostSchema = z.object({

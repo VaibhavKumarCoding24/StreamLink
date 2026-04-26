@@ -1,6 +1,38 @@
 {
   "transfers": [
     {
+      "transferId": "e98034db-afe1-46ca-b7e8-2e33306365a2",
+      "fileName": "smoke-transfer.txt",
+      "fileSize": 640000,
+      "mimeType": "text/plain",
+      "senderDeviceId": "desktop-smoke",
+      "senderName": "Desktop Smoke",
+      "storedFileName": "1777164563613-smoke-transfer.txt",
+      "downloadUrl": "/api/files/e98034db-afe1-46ca-b7e8-2e33306365a2/download",
+      "streamUrl": "/api/files/e98034db-afe1-46ca-b7e8-2e33306365a2/stream",
+      "http2StreamUrl": "/media/e98034db-afe1-46ca-b7e8-2e33306365a2/stream",
+      "supportsByteRange": true,
+      "chunkSizeBytes": 262144,
+      "createdAt": 1777164563744,
+      "status": "completed"
+    },
+    {
+      "transferId": "14373c2f-2587-4d7f-88d6-fc7103ef2f11",
+      "fileName": "smoke-transfer.txt",
+      "fileSize": 21,
+      "mimeType": "text/plain",
+      "senderDeviceId": "desktop-smoke",
+      "senderName": "Desktop Smoke",
+      "storedFileName": "1777164500233-smoke-transfer.txt",
+      "downloadUrl": "/api/files/14373c2f-2587-4d7f-88d6-fc7103ef2f11/download",
+      "streamUrl": "/api/files/14373c2f-2587-4d7f-88d6-fc7103ef2f11/stream",
+      "http2StreamUrl": "/media/14373c2f-2587-4d7f-88d6-fc7103ef2f11/stream",
+      "supportsByteRange": true,
+      "chunkSizeBytes": 262144,
+      "createdAt": 1777164500252,
+      "status": "completed"
+    },
+    {
       "transferId": "810d8053-b41e-4952-b56b-33f70880985a",
       "fileName": "Vaibhav - 12300319 - CV.pdf",
       "fileSize": 226764,
