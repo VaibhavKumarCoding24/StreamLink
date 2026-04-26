@@ -2,6 +2,7 @@
   "name": "streamlink",
   "private": true,
   "version": "0.1.0",
+  "main": "index.js",
   "workspaces": [
     "apps/*",
     "packages/*"

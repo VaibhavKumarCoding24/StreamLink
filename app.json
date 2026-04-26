@@ -1,5 +1,15 @@
 {
   "expo": {
+    "name": "StreamLink",
+    "slug": "streamlink",
+    "scheme": "streamlink",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "assetBundlePatterns": ["**/*"],
+    "android": {
+      "package": "com.vaibhavkumar.streamlink"
+    },
     "extra": {
       "eas": {
         "projectId": "c332a068-9aff-467d-8834-227742515c6b"

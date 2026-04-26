@@ -44,23 +44,17 @@
       "type": "web",
       "fingerprint": "host-566d1a5c-c62b-44f4-857f-cf307826acf6",
       "trustedAt": 1775847883483,
-      "lastSeenAt": 1775847883880,
+      "lastSeenAt": 1777159444601,
       "isHost": true,
       "accessToken": "088aeedbb6e8e853bcf24099ab4ab33b2b8ec977924c1254"
     }
   ],
   "pairings": [
     {
-      "pin": "291994",
+      "pin": "406976",
       "deviceName": "Laptop Host",
-      "createdAt": 1775847916277,
-      "expiresAt": 1775848216277
-    },
-    {
-      "pin": "687199",
-      "deviceName": "Laptop Host",
-      "createdAt": 1775848018973,
-      "expiresAt": 1775848318973
+      "createdAt": 1775857105223,
+      "expiresAt": 1775857405223
     }
   ]
 }
