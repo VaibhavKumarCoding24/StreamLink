@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: streamlink-server
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npx tsx apps/server/src/server.ts
+    envVars:
+      - key: PORT
+        value: 4000
+      - key: MEDIA_PORT
+        value: 4100
+
+  - type: web
+    name: streamlink-web
+    env: static
+    plan: free
+    buildCommand: npm install && npm run build --workspace=@streamlink/web
+    staticPublishPath: apps/web/dist
+    envVars:
+      - key: VITE_SOCKET_URL
+        fromService:
+          type: web
+          name: streamlink-server
+          envVarKey: RENDER_EXTERNAL_URL
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
